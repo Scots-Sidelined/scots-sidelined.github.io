@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Scots Sidelined</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Libre+Franklin:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<meta name="description" content="Independent student reporting on Carlmont. Student-run and not affiliated with Carlmont High School.">
+<style>
+/* Layout: blue tartan masthead, section filters, lead story over a two-column feed; stories load from posts.json. */
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --ink: #16202e;
+  --muted: #5d6673;
+  --line: #d6dbe3;
+  --chip: #e7ebf1;
+  --blue: #1f4e9c;
+  --blue-deep: #142f60;
+  --gray: #9aa3b0;
+  --on-blue: #ffffff;
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "Libre Franklin", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10151d; --surface: #182029; --ink: #e9edf3; --muted: #9ca6b4; --line: #2a3442; --chip: #222c39;
+    --blue: #6e9bea; --blue-deep: #12264a; --gray: #8a94a2; --on-blue: #ffffff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10151d; --surface: #182029; --ink: #e9edf3; --muted: #9ca6b4; --line: #2a3442; --chip: #222c39;
+  --blue: #6e9bea; --blue-deep: #12264a; --gray: #8a94a2; --on-blue: #ffffff;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1060px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.mast { background: var(--blue-deep); color: var(--on-blue); position: relative; overflow: hidden; border-bottom: 4px solid var(--gray); }
+.mast::before {
+  content: ""; position: absolute; inset: 0; opacity: .2; pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 22px, #ffffff 22px 28px, transparent 28px 50px, #9aa3b0 50px 56px, transparent 56px 76px),
+    repeating-linear-gradient(0deg, transparent 0 22px, #ffffff 22px 28px, transparent 28px 50px, #9aa3b0 50px 56px, transparent 56px 76px);
+}
+.mast .wrap { position: relative; padding-block: 28px 22px; display: grid; gap: 6px; }
+.mast .kicker { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #c9d0da; }
+.mast h1 { margin: 0; font-family: var(--display); font-weight: 900; font-size: clamp(48px, 11vw, 104px); line-height: .86; letter-spacing: .01em; text-transform: uppercase; text-wrap: balance; }
+.mast h1 span { color: #c9d0da; }
+.mast .disclaimer { font-size: 13px; opacity: .85; max-width: 62ch; }
+
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding-block: 18px 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 600 12px var(--body); letter-spacing: .04em; text-transform: uppercase; border: 1px solid var(--line); background: transparent; color: var(--muted); padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--blue); color: var(--on-blue); border-color: var(--blue); }
+.btn { font: 700 13px var(--body); letter-spacing: .04em; text-transform: uppercase; background: var(--blue); color: var(--on-blue); border: 0; padding: 10px 16px; border-radius: 4px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn:disabled { opacity: .6; cursor: default; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+
+main { padding-block-end: 48px; }
+.lead { display: grid; gap: 10px; padding-block: 18px 26px; border-bottom: 2px solid var(--blue); }
+.lead h2 { margin: 0; font-family: var(--display); font-weight: 900; font-size: clamp(34px, 6vw, 58px); line-height: .95; text-transform: uppercase; text-wrap: balance; }
+.lead .body { font-size: 17px; max-width: 65ch; white-space: pre-wrap; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 36px; }
+@media (max-width: 720px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.story { padding-block: 20px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; align-content: start; min-width: 0; }
+.story h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 28px; line-height: 1; text-transform: uppercase; text-wrap: balance; }
+.story .body { white-space: pre-wrap; }
+.story .body.clip { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 12px; color: var(--muted); }
+.cat { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
+.tag { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; background: var(--chip); color: var(--muted); padding: 2px 6px; border-radius: 3px; }
+.linkish { background: none; border: 0; padding: 0; font: 600 12px var(--body); color: var(--blue); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; justify-self: start; }
+.empty { padding-block: 40px; display: grid; gap: 8px; max-width: 52ch; }
+.empty h2 { margin: 0; font-family: var(--display); font-size: 36px; text-transform: uppercase; }
+.empty p { margin: 0; color: var(--muted); }
+footer { border-top: 1px solid var(--line); }
+footer .wrap { padding-block: 18px; font-size: 12px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .story, .lead { animation: up .35s ease both; } @keyframes up { from { transform: translateY(6px); } to { transform: none; } } }
+</style>
+<style>body{margin:0}h1,h2,h3{font-weight:inherit}</style>
+</head>
+<body>
+<header class="mast">
+  <div class="wrap">
+    <div class="kicker">Independent student reporting · Carlmont</div>
+    <h1>Scots <span>Sidelined</span></h1>
+    <div class="disclaimer">The school stories that don't make the announcements. Student-run and not affiliated with Carlmont High School.</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="bar"><div class="chips" id="chips" role="group" aria-label="Filter stories"></div></div>
+  <main id="feed" aria-live="polite"><div class="empty"><h2>Loading stories</h2><p>Pulling the latest from the newsroom.</p></div></main>
+</div>
+<footer><div class="wrap">Scots Sidelined · independent student reporting</div></footer>
+<script>
+const CATS = ["Investigations", "Policy & Rules", "Money & Budget", "Facilities & Safety", "Student Voice", "Explainers"];
+let posts = [], filter = "All";
+const $ = (id) => document.getElementById(id);
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function fmtDate(s) { if (!s) return ""; const d = new Date(s + "T12:00:00"); return isNaN(d) ? s : d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }); }
+function renderChips() {
+  const c = $("chips"); c.textContent = "";
+  ["All", ...CATS].forEach((name) => {
+    const b = el("button", "chip", name); b.type = "button";
+    b.setAttribute("aria-pressed", String(filter === name));
+    b.onclick = () => { filter = name; renderChips(); renderFeed(); };
+    c.appendChild(b);
+  });
+}
+function metaRow(p) {
+  const m = el("div", "meta");
+  m.appendChild(el("span", "cat", p.section || "News"));
+  if (p.example) m.appendChild(el("span", "tag", "Example"));
+  m.appendChild(el("span", null, (p.byline ? "By " + p.byline + " · " : "") + fmtDate(p.date)));
+  return m;
+}
+function renderFeed() {
+  const f = $("feed"); f.textContent = "";
+  const list = filter === "All" ? posts : posts.filter((p) => p.section === filter);
+  if (!list.length) {
+    const e = el("div", "empty");
+    e.appendChild(el("h2", null, filter === "All" ? "No stories yet" : "Nothing in " + filter + " yet"));
+    e.appendChild(el("p", null, "The first stories are on the way. Check back soon."));
+    f.appendChild(e); return;
+  }
+  const [lead, ...rest] = list;
+  const L = el("article", "lead");
+  L.appendChild(metaRow(lead)); L.appendChild(el("h2", null, lead.headline)); L.appendChild(el("div", "body", lead.story));
+  f.appendChild(L);
+  const g = el("div", "grid");
+  rest.forEach((p) => {
+    const a = el("article", "story");
+    a.appendChild(metaRow(p)); a.appendChild(el("h3", null, p.headline));
+    const body = el("div", "body clip", p.story); a.appendChild(body);
+    if ((p.story || "").length > 260) {
+      const more = el("button", "linkish", "Read more"); more.type = "button";
+      more.onclick = () => { const closed = body.classList.toggle("clip"); more.textContent = closed ? "Read more" : "Show less"; };
+      a.appendChild(more);
+    }
+    g.appendChild(a);
+  });
+  f.appendChild(g);
+}
+renderChips();
+fetch("posts.json", { cache: "no-store" }).then((r) => r.json()).then((data) => {
+  posts = (Array.isArray(data) ? data : []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  renderFeed();
+}).catch(() => {
+  $("feed").textContent = "";
+  const e = el("div", "empty"); e.appendChild(el("h2", null, "Stories unavailable")); e.appendChild(el("p", null, "Reload the page to try again."));
+  $("feed").appendChild(e);
+});
+</script>
+</body>
+</html>
